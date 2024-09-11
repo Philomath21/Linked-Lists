@@ -3,8 +3,12 @@ class Node
   attr_accessor :value, :next_node
 
   def initialize(value = nil, next_node = nil)
-    @value = value
-    @next_node = next_node
+    self.value = value
+    self.next_node = next_node
+  end
+
+  def to_s
+    value
   end
 end
 
@@ -21,7 +25,7 @@ class LinkedList
   def append(value)
     # Setting @next of current @tail to new Node
     new_node = Node.new(value, nil) # @next_node = nil
-    tail.next_node = new_node       # for previous tail
+    tail.next_node = new_node unless size.zero? # for previous tail
     # Changing @tail of list to new Node
     self.tail = new_node
 
@@ -40,24 +44,31 @@ class LinkedList
   end
 
   def at(index)
-    return nil if index >= size
+    # Converting reverse index (negative) into normal positive index
+    index += size if index.negative?
 
-    node = head
-    index.times { node = node.next_node }
+    if index < size && index >= 0
+      node = head
+      index.times { node = node.next_node }
+      node
+    else
+      puts 'Index not found'
+      nil
+    end
   end
 
   def pop
     popping_node = tail
 
     # Changing @tail of list to second last node
-    self.tail = at(size - 2) # second_last_node
+    self.tail = size < 2 ? nil : at(size - 2) # second_last_node
     tail.next_node = nil unless tail.nil?
 
     # Reducing size by 1
     self.size = size - 1
     self.head = tail if size < 2
 
-    popping_node.value # returning value of last node
+    popping_node # returning last node
   end
 
   def find(value)
@@ -80,17 +91,16 @@ class LinkedList
     # Converting reverse index (negative) into normal positive index
     index += size if index.negative?
 
-    if index.zero?
-      prepend(value)
-    elsif index == size
+    if index == size
       append(value)
+    elsif index.zero?
+      prepend(value)
     elsif index < size
       prev_node = at(index - 1)
       prev_node.next_node = Node.new(value, prev_node.next_node)
       self.size = size + 1 # Increasing size by 1
     else
       puts 'Index not found'
-      nil
     end
   end
 
@@ -100,13 +110,15 @@ class LinkedList
 
     if index == size - 1
       pop(value)
+    elsif index.zero?
+      self.head = head.next_node
+      self.size = size - 1 # Decreasing size by 1
     elsif index < size
       prev_node = at(index - 1)
       prev_node.next_node = prev_node.next_node.next_node
       self.size = size - 1 # Decreasing size by 1
     else
       puts 'Index not found'
-      nil
     end
   end
 
